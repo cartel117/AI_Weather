@@ -1,28 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodel/weather_viewmodel.dart';
 import '../viewmodel/weather_state.dart';
 import '../data/models/weather_station.dart';
 import 'my_scaffold.dart';
 
 /// 高雄市天氣顯示頁面
-class WeatherView extends StatelessWidget {
+class WeatherView extends ConsumerWidget {
   const WeatherView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => WeatherViewModel()..loadKaohsiungWeather(),
-      child: const _WeatherViewContent(),
-    );
-  }
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(weatherViewModelProvider);
 
-class _WeatherViewContent extends StatelessWidget {
-  const _WeatherViewContent();
-
-  @override
-  Widget build(BuildContext context) {
     return MyScaffold(
       appBar: AppBar(
         title: const Text('高雄市天氣'),
@@ -30,13 +20,13 @@ class _WeatherViewContent extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              context.read<WeatherViewModel>().refresh();
+              ref.read(weatherViewModelProvider.notifier).refresh();
             },
           ),
         ],
       ),
-      body: BlocBuilder<WeatherViewModel, WeatherState>(
-        builder: (context, state) {
+      body: Builder(
+        builder: (context) {
           if (state.isLoading) {
             return const Center(
               child: CircularProgressIndicator(),
@@ -62,7 +52,7 @@ class _WeatherViewContent extends StatelessWidget {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      context.read<WeatherViewModel>().refresh();
+                      ref.read(weatherViewModelProvider.notifier).refresh();
                     },
                     child: const Text('重新載入'),
                   ),
@@ -78,7 +68,7 @@ class _WeatherViewContent extends StatelessWidget {
           }
 
           return RefreshIndicator(
-            onRefresh: () => context.read<WeatherViewModel>().refresh(),
+            onRefresh: () => ref.read(weatherViewModelProvider.notifier).refresh(),
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),

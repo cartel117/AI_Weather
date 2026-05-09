@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/factory/viewmodel_factory.dart';
 import '../../core/router/route_names.dart';
 import '../../viewmodel/weather_viewmodel.dart';
-import '../../viewmodel/weather_state.dart';
 import '../widgets/common/base_scaffold.dart';
 import '../widgets/weather/weather_card.dart';
 import '../widgets/weather/city_list_item.dart';
@@ -12,23 +10,13 @@ import '../widgets/common/loading_view.dart';
 import '../widgets/common/error_view.dart';
 
 /// 天氣頁面
-class WeatherPage extends StatelessWidget {
+class WeatherPage extends ConsumerWidget {
   const WeatherPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ViewModelFactory.createWeatherViewModel()..loadKaohsiungWeather(),
-      child: const _WeatherPageContent(),
-    );
-  }
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(weatherViewModelProvider);
 
-class _WeatherPageContent extends StatelessWidget {
-  const _WeatherPageContent();
-
-  @override
-  Widget build(BuildContext context) {
     return BaseScaffold(
       appBar: AppBar(
         title: const Text('全台天氣'),
@@ -36,13 +24,13 @@ class _WeatherPageContent extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              context.read<WeatherViewModel>().refresh();
+              ref.read(weatherViewModelProvider.notifier).refresh();
             },
           ),
         ],
       ),
-      body: BlocBuilder<WeatherViewModel, WeatherState>(
-        builder: (context, state) {
+      body: Builder(
+        builder: (context) {
           if (state.isLoading) {
             return const LoadingView(message: '載入天氣資料中...');
           }
@@ -51,19 +39,17 @@ class _WeatherPageContent extends StatelessWidget {
             return ErrorView(
               message: state.errorMessage ?? '載入失敗',
               onRetry: () {
-                context.read<WeatherViewModel>().refresh();
+                ref.read(weatherViewModelProvider.notifier).refresh();
               },
             );
           }
 
           if (state.kaohsiungWeather == null) {
-            return const Center(
-              child: Text('無天氣資料'),
-            );
+            return const Center(child: Text('無天氣資料'));
           }
 
           return RefreshIndicator(
-            onRefresh: () => context.read<WeatherViewModel>().refresh(),
+            onRefresh: () => ref.read(weatherViewModelProvider.notifier).refresh(),
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),
@@ -79,7 +65,7 @@ class _WeatherPageContent extends StatelessWidget {
                     isHighlighted: true,
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // 全台天氣標題
                   const Text(
                     '全台灣天氣',
@@ -89,7 +75,7 @@ class _WeatherPageContent extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // 所有城市列表
                   ListView.separated(
                     shrinkWrap: true,

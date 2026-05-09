@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../core/factory/viewmodel_factory.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../viewmodel/weather_viewmodel.dart';
-import '../../viewmodel/weather_state.dart';
 import '../widgets/common/base_scaffold.dart';
 import '../widgets/weather/weather_detail_card.dart';
 import '../widgets/common/loading_view.dart';
 import '../widgets/common/error_view.dart';
 
 /// 城市詳細天氣頁面
-class CityDetailPage extends StatelessWidget {
+class CityDetailPage extends ConsumerWidget {
   final String cityName;
 
   const CityDetailPage({
@@ -18,27 +16,15 @@ class CityDetailPage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ViewModelFactory.createWeatherViewModel()..loadKaohsiungWeather(),
-      child: _CityDetailPageContent(cityName: cityName),
-    );
-  }
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(weatherViewModelProvider);
 
-class _CityDetailPageContent extends StatelessWidget {
-  final String cityName;
-
-  const _CityDetailPageContent({required this.cityName});
-
-  @override
-  Widget build(BuildContext context) {
     return BaseScaffold(
       appBar: AppBar(
         title: Text('$cityName 天氣詳情'),
       ),
-      body: BlocBuilder<WeatherViewModel, WeatherState>(
-        builder: (context, state) {
+      body: Builder(
+        builder: (context) {
           if (state.isLoading) {
             return const LoadingView(message: '載入天氣資料中...');
           }
@@ -47,9 +33,13 @@ class _CityDetailPageContent extends StatelessWidget {
             return ErrorView(
               message: state.errorMessage ?? '載入失敗',
               onRetry: () {
-                context.read<WeatherViewModel>().refresh();
+                ref.read(weatherViewModelProvider.notifier).refresh();
               },
             );
+          }
+
+          if (state.allCities.isEmpty) {
+            return const Center(child: Text('無天氣資料'));
           }
 
           // 尋找指定城市的資料
