@@ -9,6 +9,10 @@ final weatherViewModelProvider =
   return WeatherViewModel();
 });
 
+/// 溫度單位 Provider（true = 攝氏°C, false = 華氏°F）
+/// 全域共享，切換後所有頁面同步更新
+final isCelsiusProvider = StateProvider<bool>((ref) => true);
+
 /// 天氣 ViewModel (使用 Riverpod StateNotifier)
 class WeatherViewModel extends StateNotifier<WeatherState> {
   final SimpleWeatherService _weatherService;

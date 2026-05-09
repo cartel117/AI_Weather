@@ -2,14 +2,28 @@ import 'package:flutter/material.dart';
 import '../../../data/models/weather_station.dart';
 import 'weather_icon_helper.dart';
 
+/// 溫度格式化工具函式
+/// [celsius] 攝氏字串（來自 API），[isCelsius] true = 顯示°C，false = 轉換並顯示°F
+String formatTemperature(String? celsius, bool isCelsius) {
+  if (celsius == null) return '--';
+  if (isCelsius) return '$celsius°C';
+  final c = double.tryParse(celsius);
+  if (c == null) return '--';
+  final f = (c * 9 / 5 + 32).toStringAsFixed(1);
+  return '$f°F';
+}
+
 /// 天氣詳細資訊卡片 Widget
 /// 顯示完整的天氣資訊
 class WeatherDetailCard extends StatelessWidget {
   final WeatherStation station;
+  // 溫度單位：true = 攝氏，false = 華氏
+  final bool isCelsius;
 
   const WeatherDetailCard({
     super.key,
     required this.station,
+    this.isCelsius = true,
   });
 
   @override
@@ -66,9 +80,7 @@ class WeatherDetailCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 16),
                     Text(
-                      station.temperature != null 
-                          ? '${station.temperature}°C' 
-                          : '--',
+                      formatTemperature(station.temperature, isCelsius),
                       style: const TextStyle(
                         fontSize: 64,
                         fontWeight: FontWeight.bold,

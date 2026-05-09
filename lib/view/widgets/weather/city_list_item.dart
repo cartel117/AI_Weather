@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import '../../../data/models/weather_station.dart';
 import 'weather_icon_helper.dart';
+import 'weather_detail_card.dart' show formatTemperature;
 
 /// 城市列表項目 Widget
 /// 可重複使用的城市天氣列表項目
 class CityListItem extends StatelessWidget {
   final WeatherStation station;
   final VoidCallback? onTap;
+  // 溫度單位：true = 攝氏，false = 華氏
+  final bool isCelsius;
 
   const CityListItem({
     super.key,
     required this.station,
     this.onTap,
+    this.isCelsius = true,
   });
 
   @override
@@ -73,9 +77,7 @@ class CityListItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    station.temperature != null 
-                        ? '${station.temperature}°C' 
-                        : '--',
+                    formatTemperature(station.temperature, isCelsius),
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,

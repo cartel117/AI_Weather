@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodel/weather_viewmodel.dart';
 import '../viewmodel/weather_state.dart';
 import '../data/models/weather_station.dart';
+import '../view/widgets/weather/weather_detail_card.dart' show formatTemperature;
 import 'my_scaffold.dart';
 
 /// 高雄市天氣顯示頁面
@@ -12,11 +13,24 @@ class WeatherView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(weatherViewModelProvider);
+    // 監聽溫度單位，切換時自動重組
+    final isCelsius = ref.watch(isCelsiusProvider);
 
     return MyScaffold(
       appBar: AppBar(
         title: const Text('高雄市天氣'),
         actions: [
+          TextButton(
+            // 點擊即切換攝氏 / 華氏
+            onPressed: () {
+              ref.read(isCelsiusProvider.notifier).state = !isCelsius;
+            },
+            child: Text(
+              // 顯示目前單位，提示使用者可點擊切換
+              isCelsius ? '°C' : '°F',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
@@ -76,11 +90,11 @@ class WeatherView extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 當前天氣卡片
-                  _CurrentWeatherCard(state: state),
+                  _CurrentWeatherCard(state: state, isCelsius: isCelsius),
                   const SizedBox(height: 24),
                   
                   // 天氣資訊卡片
-                  _WeatherInfoCard(state: state),
+                  _WeatherInfoCard(state: state, isCelsius: isCelsius),
                   const SizedBox(height: 24),
                   
                   // 其他城市天氣標題
@@ -94,7 +108,7 @@ class WeatherView extends ConsumerWidget {
                   const SizedBox(height: 16),
                   
                   // 所有城市列表
-                  _AllCitiesWeatherList(state: state),
+                  _AllCitiesWeatherList(state: state, isCelsius: isCelsius),
                 ],
               ),
             ),
@@ -108,8 +122,10 @@ class WeatherView extends ConsumerWidget {
 /// 當前天氣卡片
 class _CurrentWeatherCard extends StatelessWidget {
   final WeatherState state;
+  // 溫度單位：true = 攝氏，false = 華氏
+  final bool isCelsius;
 
-  const _CurrentWeatherCard({required this.state});
+  const _CurrentWeatherCard({required this.state, required this.isCelsius});
 
   @override
   Widget build(BuildContext context) {
@@ -155,11 +171,12 @@ class _CurrentWeatherCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                // 溫度
+                // 溫度（根據 isCelsius 轉換單位）
                 _WeatherInfoItem(
                   icon: Icons.thermostat,
                   label: '溫度',
-                  value: state.currentTemperature ?? '--',
+                  value: formatTemperature(
+                      state.kaohsiungWeather?.temperature, isCelsius),
                 ),
                 // 濕度
                 _WeatherInfoItem(
@@ -222,8 +239,10 @@ class _WeatherInfoItem extends StatelessWidget {
 /// 天氣詳細資訊卡片
 class _WeatherInfoCard extends StatelessWidget {
   final WeatherState state;
+  // 溫度單位：true = 攝氏，false = 華氏
+  final bool isCelsius;
 
-  const _WeatherInfoCard({required this.state});
+  const _WeatherInfoCard({required this.state, required this.isCelsius});
 
   @override
   Widget build(BuildContext context) {
@@ -249,7 +268,7 @@ class _WeatherInfoCard extends StatelessWidget {
             const SizedBox(height: 16),
             _InfoRow(label: '測站名稱', value: station.cityName),
             if (station.temperature != null)
-              _InfoRow(label: '氣溫', value: '${station.temperature}°C'),
+              _InfoRow(label: '氣溫', value: formatTemperature(station.temperature, isCelsius)),
             if (station.humidity != null)
               _InfoRow(label: '相對濕度', value: '${station.humidity}%'),
             if (station.windSpeed != null)
@@ -302,8 +321,10 @@ class _InfoRow extends StatelessWidget {
 /// 全台灣城市天氣列表
 class _AllCitiesWeatherList extends StatelessWidget {
   final WeatherState state;
+  // 溫度單位：true = 攝氏，false = 華氏
+  final bool isCelsius;
 
-  const _AllCitiesWeatherList({required this.state});
+  const _AllCitiesWeatherList({required this.state, required this.isCelsius});
 
   @override
   Widget build(BuildContext context) {
@@ -320,7 +341,7 @@ class _AllCitiesWeatherList extends StatelessWidget {
 
     return Column(
       children: state.allCities.map((station) {
-        return _CityWeatherCard(station: station);
+        return _CityWeatherCard(station: station, isCelsius: isCelsius);
       }).toList(),
     );
   }
@@ -329,8 +350,10 @@ class _AllCitiesWeatherList extends StatelessWidget {
 /// 單一城市天氣卡片
 class _CityWeatherCard extends StatelessWidget {
   final WeatherStation station;
+  // 溫度單位：true = 攝氏，false = 華氏
+  final bool isCelsius;
 
-  const _CityWeatherCard({required this.station});
+  const _CityWeatherCard({required this.station, required this.isCelsius});
 
   @override
   Widget build(BuildContext context) {
@@ -377,13 +400,11 @@ class _CityWeatherCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                // 溫度
+                // 溫度（根據 isCelsius 轉換單位）
                 _WeatherInfoItem(
                   icon: Icons.thermostat,
                   label: '溫度',
-                  value: station.temperature != null 
-                      ? '${station.temperature}°C' 
-                      : '--',
+                  value: formatTemperature(station.temperature, isCelsius),
                 ),
                 // 濕度
                 _WeatherInfoItem(

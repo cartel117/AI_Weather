@@ -4,7 +4,7 @@ class ApiConstants {
   // 使用方式：flutter run --dart-define=CWB_API_KEY=your_actual_key
   static const String apiKey = String.fromEnvironment(
     'CWB_API_KEY',
-    defaultValue: 'YOUR_CWB_API_KEY_HERE', // 請替換為您的 API Key
+    defaultValue: 'CWA-A5219274-70A4-4DEB-8698-5F617EF71A12', // 請替換為您的 API Key
   );
   
   // API Base URL

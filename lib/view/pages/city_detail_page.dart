@@ -17,11 +17,28 @@ class CityDetailPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 1. 監聽天氣數據狀態：當 ViewModel 的 state 更新（如載入成功、失敗）時，自動重構此 UI
     final state = ref.watch(weatherViewModelProvider);
+    // 2. 監聽溫度單位，切換時自動重組
+    final isCelsius = ref.watch(isCelsiusProvider);
 
     return BaseScaffold(
       appBar: AppBar(
         title: Text('$cityName 天氣詳情'),
+        actions: [
+          TextButton(
+            // 點擊即切換攝氏 / 華氏，共用全域 isCelsiusProvider
+            onPressed: () {
+              // 注意：事件處理中（副作用）請使用 ref.read，避免不必要的監聽
+              ref.read(isCelsiusProvider.notifier).state = !isCelsius;
+            },
+            child: Text(
+              // 顯示目前單位，提示使用者可點擊切換
+              isCelsius ? '°C' : '°F',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
       ),
       body: Builder(
         builder: (context) {
@@ -50,7 +67,8 @@ class CityDetailPage extends ConsumerWidget {
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
-            child: WeatherDetailCard(station: cityWeather),
+            // 將溫度單位传達至詳情卡片
+            child: WeatherDetailCard(station: cityWeather, isCelsius: isCelsius),
           );
         },
       ),

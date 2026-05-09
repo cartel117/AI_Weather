@@ -6,6 +6,7 @@ import '../../viewmodel/weather_viewmodel.dart';
 import '../widgets/common/base_scaffold.dart';
 import '../widgets/weather/weather_card.dart';
 import '../widgets/weather/city_list_item.dart';
+import '../widgets/weather/weather_detail_card.dart' show formatTemperature;
 import '../widgets/common/loading_view.dart';
 import '../widgets/common/error_view.dart';
 
@@ -16,11 +17,24 @@ class WeatherPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(weatherViewModelProvider);
+    // 監聽溫度單位，切換時自動重組
+    final isCelsius = ref.watch(isCelsiusProvider);
 
     return BaseScaffold(
       appBar: AppBar(
         title: const Text('全台天氣'),
         actions: [
+          TextButton(
+            // 點擊即切換攝氏 / 華氏
+            onPressed: () {
+              ref.read(isCelsiusProvider.notifier).state = !isCelsius;
+            },
+            child: Text(
+              // 顯示目前單位，提示使用者可點擊切換
+              isCelsius ? '°C' : '°F',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
@@ -59,7 +73,9 @@ class WeatherPage extends ConsumerWidget {
                   // 高雄當前天氣卡片
                   WeatherCard(
                     cityName: state.kaohsiungWeather!.cityName,
-                    temperature: state.currentTemperature ?? '--',
+                    // 根據 isCelsius 轉換温度單位
+                    temperature: formatTemperature(
+                        state.kaohsiungWeather!.temperature, isCelsius),
                     humidity: state.humidity ?? '--',
                     weather: state.weatherDescription ?? '無資料',
                     isHighlighted: true,
@@ -86,6 +102,8 @@ class WeatherPage extends ConsumerWidget {
                       final city = state.allCities[index];
                       return CityListItem(
                         station: city,
+                        // 將溫度單位传達至列表項目
+                        isCelsius: isCelsius,
                         onTap: () {
                           context.pushNamed(
                             RouteNames.cityDetail,
