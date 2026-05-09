@@ -5,9 +5,10 @@
 ![Flutter](https://img.shields.io/badge/Flutter-3.3.0+-02569B?style=flat&logo=flutter)
 ![Dart](https://img.shields.io/badge/Dart-3.3.0+-0175C2?style=flat&logo=dart)
 ![Architecture](https://img.shields.io/badge/Architecture-MVVM-green)
+![State](https://img.shields.io/badge/State-Riverpod-blue)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 
-一個採用 **MVVM 架構 + Factory Pattern + go_router** 的現代化 Flutter 天氣應用程式
+一個採用 **MVVM 架構 + Riverpod + go_router** 的現代化 Flutter 天氣應用程式
 
 [功能特色](#功能特色) • [架構設計](#架構設計) • [快速開始](#快速開始) • [文檔](#文檔)
 
@@ -17,11 +18,13 @@
 
 ## 📱 功能特色
 
-- ✅ **即時天氣資訊** - 顯示全台灣各地即時天氣數據
+- ✅ **即時天氣資訊** - 顯示全台灣各地即時天氣數據（中央氣象署 API）
+- ✅ **動態天氣圖示** - 根據天氣描述自動對應 Material Icon 與顏色
+- ✅ **溫度單位切換** - AppBar 一鍵切換 °C / °F，全頁面即時同步
 - ✅ **城市詳情** - 查看各城市詳細天氣資訊
 - ✅ **下拉刷新** - 即時更新天氣資料
 - ✅ **美觀 UI** - Material Design 3 設計風格
-- ✅ **高效架構** - MVVM + Factory Pattern
+- ✅ **高效架構** - MVVM + Riverpod StateNotifier
 - ✅ **模組化設計** - 高度可重用的組件
 
 ## 🏗️ 架構設計
@@ -37,13 +40,17 @@
 │  │  Pages   │  │ Widgets  │  │ Scaffold │  │
 │  └──────────┘  └──────────┘  └──────────┘  │
 └─────────────────┬───────────────────────────┘
-                  │ BlocBuilder
+                  │ ref.watch (Riverpod)
 ┌─────────────────▼───────────────────────────┐
 │          ViewModel (Logic Layer)            │
 │  ┌──────────────────────────────────────┐   │
-│  │  WeatherViewModel (Cubit)            │   │
-│  │  - loadData()                        │   │
+│  │  WeatherViewModel (StateNotifier)    │   │
+│  │  - loadKaohsiungWeather()            │   │
 │  │  - refresh()                         │   │
+│  └──────────────────────────────────────┘   │
+│  ┌──────────────────────────────────────┐   │
+│  │  isCelsiusProvider (StateProvider)   │   │
+│  │  - 全域溫度單位狀態（°C / °F）        │   │
 │  └──────────────────────────────────────┘   │
 └─────────────────┬───────────────────────────┘
                   │ Service Calls
@@ -58,9 +65,9 @@
 ### 設計模式
 
 - **MVVM**: Model-View-ViewModel 分層架構
-- **Factory Pattern**: 依賴注入和對象創建管理
+- **Riverpod**: 使用 `StateNotifierProvider` 管理天氣狀態，`StateProvider` 管理 UI 偏好設定
 - **Repository Pattern**: 數據訪問抽象層
-- **BLoC Pattern**: 使用 flutter_bloc 進行狀態管理
+- **Helper Pattern**: `WeatherIconHelper` 集中管理天氣圖示與顏色映射
 
 ### 目錄結構
 
@@ -68,8 +75,7 @@
 lib/
 ├── core/                          # 核心功能
 │   ├── constants/                 # 常數定義
-│   ├── factory/                   # 工廠模式
-│   │   └── viewmodel_factory.dart # ViewModel 工廠
+│   ├── factory/                   # 工廠模式（保留備用）
 │   ├── network/                   # 網路配置
 │   └── router/                    # 路由管理
 │       ├── app_router.dart        # go_router 配置
@@ -83,10 +89,13 @@ lib/
 │   └── widgets/                   # 可重用組件
 │       ├── common/                # 通用組件
 │       └── weather/               # 天氣組件
+│           ├── weather_icon_helper.dart  # 天氣圖示映射
+│           ├── weather_detail_card.dart  # 城市詳情卡片
+│           └── city_list_item.dart       # 城市列表項目
 ├── viewmodel/                     # 視圖模型層
-│   ├── weather_viewmodel.dart     # ViewModel (Cubit)
+│   ├── weather_viewmodel.dart     # StateNotifier + Providers
 │   └── weather_state.dart         # State (Freezed)
-└── main.dart                      # 應用入口
+└── main.dart                      # 應用入口（ProviderScope）
 ```
 
 ## 🚀 快速開始
@@ -153,16 +162,47 @@ context.pushNamed(
 );
 ```
 
-#### 2️⃣ 使用 Factory 創建 ViewModel
+#### 2️⃣ 使用 Riverpod 讀取狀態
 
 ```dart
-BlocProvider(
-  create: (_) => ViewModelFactory.createWeatherViewModel(),
-  child: YourPage(),
+// 在 ConsumerWidget 中讀取天氣狀態
+class MyPage extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(weatherViewModelProvider);
+    final isCelsius = ref.watch(isCelsiusProvider);
+
+    // 觸發操作
+    ref.read(weatherViewModelProvider.notifier).refresh();
+
+    // 切換溫度單位
+    ref.read(isCelsiusProvider.notifier).state = !isCelsius;
+  }
+}
+```
+
+#### 3️⃣ 溫度單位格式化
+
+```dart
+// formatTemperature 會根據 isCelsius 自動轉換
+import 'package:weather/view/widgets/weather/weather_detail_card.dart'
+    show formatTemperature;
+
+Text(formatTemperature('28', isCelsius)); // "28°C" 或 "82.4°F"
+```
+
+#### 4️⃣ 動態天氣圖示
+
+```dart
+import 'package:weather/view/widgets/weather/weather_icon_helper.dart';
+
+Icon(
+  WeatherIconHelper.iconFor('晴天'),   // Icons.wb_sunny
+  color: WeatherIconHelper.colorFor('晴天'), // Colors.orange
 )
 ```
 
-#### 3️⃣ 使用可重用組件
+#### 5️⃣ 使用可重用組件
 
 ```dart
 // 基礎腳手架
@@ -195,7 +235,7 @@ WeatherCard(
 
 | 套件 | 版本 | 用途 |
 |------|------|------|
-| flutter_bloc | ^8.1.6 | 狀態管理 |
+| flutter_riverpod | ^2.6.1 | 狀態管理（StateNotifier + StateProvider） |
 | go_router | ^14.3.0 | 路由管理 |
 | freezed | ^2.5.2 | 不可變類別生成 |
 | dio | ^5.4.0 | HTTP 客戶端 |
@@ -216,10 +256,10 @@ WeatherCard(
 - 減少重複代碼 50-70%
 - 標準化的 Widget 庫
 
-### 2. Factory Pattern
-- 集中管理依賴注入
-- 服務單例化
-- 易於測試和 Mock
+### 2. Riverpod 狀態管理
+- 全域 Provider，跨頁面共享狀態不需傳參
+- `isCelsiusProvider` 切換溫度單位，所有頁面自動同步
+- ConsumerWidget + `ref.watch` 精準重建，效能佳
 
 ### 3. go_router
 - 聲明式路由定義
@@ -250,11 +290,11 @@ GoRoute(
   ),
 ),
 
-// 3. 創建頁面
+// 3. 創建頁面（ConsumerWidget 以使用 Riverpod）
 // lib/view/pages/new_page.dart
-class NewPage extends StatelessWidget {
+class NewPage extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return BaseScaffold(
       appBar: AppBar(title: const Text('新頁面')),
       body: Center(
@@ -271,29 +311,15 @@ class NewPage extends StatelessWidget {
 ### 創建帶狀態的頁面
 
 ```dart
-class DataPage extends StatelessWidget {
+class DataPage extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ViewModelFactory.createYourViewModel()..loadData(),
-      child: const _DataPageContent(),
-    );
-  }
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(weatherViewModelProvider);
+    final isCelsius = ref.watch(isCelsiusProvider);
 
-class _DataPageContent extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return BaseScaffold(
-      appBar: AppBar(title: const Text('數據頁面')),
-      body: BlocBuilder<YourViewModel, YourState>(
-        builder: (context, state) {
-          if (state.isLoading) return const LoadingView();
-          if (state.hasError) return ErrorView(message: state.errorMessage);
-          return YourContent(data: state.data);
-        },
-      ),
-    );
+    if (state.isLoading) return const LoadingView();
+    if (state.hasError) return ErrorView(message: state.errorMessage);
+    return YourContent(state: state, isCelsius: isCelsius);
   }
 }
 ```
@@ -336,7 +362,7 @@ flutter test --coverage
 ## 🙏 致謝
 
 - [Flutter](https://flutter.dev/) - Google 的 UI 框架
-- [flutter_bloc](https://bloclibrary.dev/) - 狀態管理解決方案
+- [flutter_riverpod](https://riverpod.dev/) - 狀態管理解決方案
 - [go_router](https://pub.dev/packages/go_router) - 聲明式路由
 - [freezed](https://pub.dev/packages/freezed) - 代碼生成工具
 - 中央氣象署 - 天氣數據 API
