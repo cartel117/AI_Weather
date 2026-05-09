@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../data/models/weather_station.dart';
+import 'weather_icon_helper.dart';
 
 /// 城市列表項目 Widget
 /// 可重複使用的城市天氣列表項目
@@ -32,12 +33,12 @@ class CityListItem extends StatelessWidget {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade100,
+                  color: WeatherIconHelper.colorFor(station.weather).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(25),
                 ),
-                child: const Icon(
-                  Icons.location_city,
-                  color: Colors.blue,
+                child: Icon(
+                  WeatherIconHelper.iconFor(station.weather),
+                  color: WeatherIconHelper.colorFor(station.weather),
                   size: 28,
                 ),
               ),

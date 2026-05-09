@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../data/models/weather_station.dart';
+import 'weather_icon_helper.dart';
 
 /// 天氣詳細資訊卡片 Widget
 /// 顯示完整的天氣資訊
@@ -33,6 +34,14 @@ class WeatherDetailCard extends StatelessWidget {
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                   ),
+                ),
+                const SizedBox(height: 16),
+
+                // 天氣 icon
+                Icon(
+                  WeatherIconHelper.iconFor(station.weather),
+                  size: 80,
+                  color: WeatherIconHelper.colorFor(station.weather),
                 ),
                 const SizedBox(height: 8),
                 
