@@ -11,11 +11,26 @@ import '../widgets/common/loading_view.dart';
 import '../widgets/common/error_view.dart';
 
 /// 天氣頁面
-class WeatherPage extends ConsumerWidget {
+class WeatherPage extends ConsumerStatefulWidget {
   const WeatherPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WeatherPage> createState() => _WeatherPageState();
+}
+
+class _WeatherPageState extends ConsumerState<WeatherPage> {
+  // 搜尋關鍵字控制器
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(weatherViewModelProvider);
     // 監聽溫度單位，切換時自動重組
     final isCelsius = ref.watch(isCelsiusProvider);
@@ -90,29 +105,76 @@ class WeatherPage extends ConsumerWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  const SizedBox(height: 12),
+
+                  // 城市搜尋欄
+                  TextField(
+                    controller: _searchController,
+                    onChanged: (value) {
+                      setState(() => _searchQuery = value.trim());
+                    },
+                    decoration: InputDecoration(
+                      hintText: '搜尋城市...',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() => _searchQuery = '');
+                              },
+                            )
+                          : null,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 12),
+                    ),
+                  ),
                   const SizedBox(height: 16),
 
-                  // 所有城市列表
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: state.allCities.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final city = state.allCities[index];
-                      return CityListItem(
-                        station: city,
-                        // 將溫度單位传達至列表項目
-                        isCelsius: isCelsius,
-                        onTap: () {
-                          context.pushNamed(
-                            RouteNames.cityDetail,
-                            pathParameters: {'cityName': city.cityName},
-                          );
-                        },
+                  // 過濾後的城市列表
+                  Builder(builder: (context) {
+                    final filtered = _searchQuery.isEmpty
+                        ? state.allCities
+                        : state.allCities
+                            .where((s) => s.cityName.contains(_searchQuery))
+                            .toList();
+
+                    if (filtered.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 32),
+                        child: Center(
+                          child: Text(
+                            '找不到「$_searchQuery」相關城市',
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                        ),
                       );
-                    },
-                  ),
+                    }
+
+                    return ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: filtered.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final city = filtered[index];
+                        return CityListItem(
+                          station: city,
+                          // 將溫度單位传達至列表項目
+                          isCelsius: isCelsius,
+                          onTap: () {
+                            context.pushNamed(
+                              RouteNames.cityDetail,
+                              pathParameters: {'cityName': city.cityName},
+                            );
+                          },
+                        );
+                      },
+                    );
+                  }),
                 ],
               ),
             ),
