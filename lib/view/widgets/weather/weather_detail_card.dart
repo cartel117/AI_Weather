@@ -28,16 +28,21 @@ class WeatherDetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 根據溫度計算漸層顏色：高溫暖色、低溫冷色
+    final gradient = _temperatureGradient(station.temperature);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 主要天氣卡片
+        // 主要天氣卡片（溫度漸層背景）
         Card(
           elevation: 4,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Padding(
+          clipBehavior: Clip.antiAlias,
+          child: Container(
+            decoration: BoxDecoration(gradient: gradient),
             padding: const EdgeInsets.all(24),
             child: Column(
               children: [
@@ -47,6 +52,7 @@ class WeatherDetailCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -55,20 +61,20 @@ class WeatherDetailCard extends StatelessWidget {
                 Icon(
                   WeatherIconHelper.iconFor(station.weather),
                   size: 80,
-                  color: WeatherIconHelper.colorFor(station.weather),
+                  color: Colors.white.withOpacity(0.9),
                 ),
                 const SizedBox(height: 8),
-                
+
                 // 天氣描述
                 Text(
                   station.weather,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
-                    color: Colors.grey.shade600,
+                    color: Colors.white70,
                   ),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // 溫度顯示
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -76,7 +82,7 @@ class WeatherDetailCard extends StatelessWidget {
                     const Icon(
                       Icons.thermostat,
                       size: 64,
-                      color: Colors.orange,
+                      color: Colors.white70,
                     ),
                     const SizedBox(width: 16),
                     Text(
@@ -84,6 +90,7 @@ class WeatherDetailCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 64,
                         fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
                   ],
@@ -141,6 +148,44 @@ class WeatherDetailCard extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// 根據攝氏溫度返回對應漸層：
+  /// ≥ 30°C 紅橙暖色，20–29°C 橙黃，10–19°C 藍綠，< 10°C 藍紫冷色
+  LinearGradient _temperatureGradient(String? celsius) {
+    final temp = double.tryParse(celsius ?? '');
+    if (temp == null) {
+      return const LinearGradient(
+        colors: [Color(0xFF78909C), Color(0xFF546E7A)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
+    }
+    if (temp >= 30) {
+      return const LinearGradient(
+        colors: [Color(0xFFFF6F00), Color(0xFFE53935)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
+    } else if (temp >= 20) {
+      return const LinearGradient(
+        colors: [Color(0xFFFFB300), Color(0xFFFB8C00)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
+    } else if (temp >= 10) {
+      return const LinearGradient(
+        colors: [Color(0xFF26C6DA), Color(0xFF00897B)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
+    } else {
+      return const LinearGradient(
+        colors: [Color(0xFF5C6BC0), Color(0xFF3949AB)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
+    }
   }
 }
 
