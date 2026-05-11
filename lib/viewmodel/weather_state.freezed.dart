@@ -23,7 +23,9 @@ mixin _$WeatherState {
   List<WeatherStation> get allCities => throw _privateConstructorUsedError;
   String? get currentTemperature => throw _privateConstructorUsedError;
   String? get humidity => throw _privateConstructorUsedError;
-  String? get weatherDescription => throw _privateConstructorUsedError;
+  String? get weatherDescription =>
+      throw _privateConstructorUsedError; // 最後成功更新的時間，null 表示尚未載入完成
+  DateTime? get lastUpdatedAt => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $WeatherStateCopyWith<WeatherState> get copyWith =>
@@ -44,7 +46,8 @@ abstract class $WeatherStateCopyWith<$Res> {
       List<WeatherStation> allCities,
       String? currentTemperature,
       String? humidity,
-      String? weatherDescription});
+      String? weatherDescription,
+      DateTime? lastUpdatedAt});
 
   $WeatherStationCopyWith<$Res>? get kaohsiungWeather;
 }
@@ -70,6 +73,7 @@ class _$WeatherStateCopyWithImpl<$Res, $Val extends WeatherState>
     Object? currentTemperature = freezed,
     Object? humidity = freezed,
     Object? weatherDescription = freezed,
+    Object? lastUpdatedAt = freezed,
   }) {
     return _then(_value.copyWith(
       isLoading: null == isLoading
@@ -104,6 +108,10 @@ class _$WeatherStateCopyWithImpl<$Res, $Val extends WeatherState>
           ? _value.weatherDescription
           : weatherDescription // ignore: cast_nullable_to_non_nullable
               as String?,
+      lastUpdatedAt: freezed == lastUpdatedAt
+          ? _value.lastUpdatedAt
+          : lastUpdatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
     ) as $Val);
   }
 
@@ -136,7 +144,8 @@ abstract class _$$WeatherStateImplCopyWith<$Res>
       List<WeatherStation> allCities,
       String? currentTemperature,
       String? humidity,
-      String? weatherDescription});
+      String? weatherDescription,
+      DateTime? lastUpdatedAt});
 
   @override
   $WeatherStationCopyWith<$Res>? get kaohsiungWeather;
@@ -161,6 +170,7 @@ class __$$WeatherStateImplCopyWithImpl<$Res>
     Object? currentTemperature = freezed,
     Object? humidity = freezed,
     Object? weatherDescription = freezed,
+    Object? lastUpdatedAt = freezed,
   }) {
     return _then(_$WeatherStateImpl(
       isLoading: null == isLoading
@@ -195,6 +205,10 @@ class __$$WeatherStateImplCopyWithImpl<$Res>
           ? _value.weatherDescription
           : weatherDescription // ignore: cast_nullable_to_non_nullable
               as String?,
+      lastUpdatedAt: freezed == lastUpdatedAt
+          ? _value.lastUpdatedAt
+          : lastUpdatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
     ));
   }
 }
@@ -210,7 +224,8 @@ class _$WeatherStateImpl implements _WeatherState {
       final List<WeatherStation> allCities = const [],
       this.currentTemperature,
       this.humidity,
-      this.weatherDescription})
+      this.weatherDescription,
+      this.lastUpdatedAt})
       : _allCities = allCities;
 
   @override
@@ -238,10 +253,13 @@ class _$WeatherStateImpl implements _WeatherState {
   final String? humidity;
   @override
   final String? weatherDescription;
+// 最後成功更新的時間，null 表示尚未載入完成
+  @override
+  final DateTime? lastUpdatedAt;
 
   @override
   String toString() {
-    return 'WeatherState(isLoading: $isLoading, hasError: $hasError, errorMessage: $errorMessage, kaohsiungWeather: $kaohsiungWeather, allCities: $allCities, currentTemperature: $currentTemperature, humidity: $humidity, weatherDescription: $weatherDescription)';
+    return 'WeatherState(isLoading: $isLoading, hasError: $hasError, errorMessage: $errorMessage, kaohsiungWeather: $kaohsiungWeather, allCities: $allCities, currentTemperature: $currentTemperature, humidity: $humidity, weatherDescription: $weatherDescription, lastUpdatedAt: $lastUpdatedAt)';
   }
 
   @override
@@ -264,7 +282,9 @@ class _$WeatherStateImpl implements _WeatherState {
             (identical(other.humidity, humidity) ||
                 other.humidity == humidity) &&
             (identical(other.weatherDescription, weatherDescription) ||
-                other.weatherDescription == weatherDescription));
+                other.weatherDescription == weatherDescription) &&
+            (identical(other.lastUpdatedAt, lastUpdatedAt) ||
+                other.lastUpdatedAt == lastUpdatedAt));
   }
 
   @override
@@ -277,7 +297,8 @@ class _$WeatherStateImpl implements _WeatherState {
       const DeepCollectionEquality().hash(_allCities),
       currentTemperature,
       humidity,
-      weatherDescription);
+      weatherDescription,
+      lastUpdatedAt);
 
   @JsonKey(ignore: true)
   @override
@@ -295,7 +316,8 @@ abstract class _WeatherState implements WeatherState {
       final List<WeatherStation> allCities,
       final String? currentTemperature,
       final String? humidity,
-      final String? weatherDescription}) = _$WeatherStateImpl;
+      final String? weatherDescription,
+      final DateTime? lastUpdatedAt}) = _$WeatherStateImpl;
 
   @override
   bool get isLoading;
@@ -313,6 +335,8 @@ abstract class _WeatherState implements WeatherState {
   String? get humidity;
   @override
   String? get weatherDescription;
+  @override // 最後成功更新的時間，null 表示尚未載入完成
+  DateTime? get lastUpdatedAt;
   @override
   @JsonKey(ignore: true)
   _$$WeatherStateImplCopyWith<_$WeatherStateImpl> get copyWith =>

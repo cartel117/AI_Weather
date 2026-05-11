@@ -48,6 +48,8 @@ class WeatherViewModel extends StateNotifier<WeatherState> {
             ? '${kaohsiungStation.humidity}%'
             : '--',
         weatherDescription: kaohsiungStation.weather,
+        // 記錄本次成功載入的時間
+        lastUpdatedAt: DateTime.now(),
       );
     } catch (e) {
       state = state.copyWith(

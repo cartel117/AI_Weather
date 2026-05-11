@@ -15,5 +15,7 @@ class WeatherState with _$WeatherState {
     String? currentTemperature,
     String? humidity,
     String? weatherDescription,
+    // 最後成功更新的時間，null 表示尚未載入完成
+    DateTime? lastUpdatedAt,
   }) = _WeatherState;
 }

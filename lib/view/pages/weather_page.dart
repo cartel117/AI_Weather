@@ -29,6 +29,14 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
     super.dispose();
   }
 
+  /// 將 DateTime 格式化為「HH:mm:ss」顯示
+  String _formatTime(DateTime dt) {
+    final h = dt.hour.toString().padLeft(2, '0');
+    final m = dt.minute.toString().padLeft(2, '0');
+    final s = dt.second.toString().padLeft(2, '0');
+    return '$h:$m:$s';
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(weatherViewModelProvider);
@@ -175,6 +183,21 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
                       },
                     );
                   }),
+
+                  // 最後更新時間
+                  if (state.lastUpdatedAt != null) ...[
+                    const SizedBox(height: 24),
+                    Center(
+                      child: Text(
+                        '最後更新：${_formatTime(state.lastUpdatedAt!)}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
