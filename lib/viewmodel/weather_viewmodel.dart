@@ -20,11 +20,11 @@ class WeatherViewModel extends StateNotifier<WeatherState> {
   WeatherViewModel({SimpleWeatherService? weatherService})
       : _weatherService = weatherService ?? SimpleWeatherService(),
         super(const WeatherState()) {
-    loadKaohsiungWeather();
+    loadAllCitiesWeather();
   }
 
   /// 載入高雄市天氣資料
-  Future<void> loadKaohsiungWeather() async {
+  Future<void> loadAllCitiesWeather() async {
     state = state.copyWith(isLoading: true, hasError: false);
 
     try {
@@ -62,6 +62,6 @@ class WeatherViewModel extends StateNotifier<WeatherState> {
 
   /// 重新整理天氣資料
   Future<void> refresh() async {
-    await loadKaohsiungWeather();
+    await loadAllCitiesWeather();
   }
 }

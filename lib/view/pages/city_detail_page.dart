@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/models/weather_station.dart';
 import '../../viewmodel/weather_viewmodel.dart';
 import '../widgets/common/base_scaffold.dart';
 import '../widgets/weather/weather_detail_card.dart';
@@ -59,11 +60,16 @@ class CityDetailPage extends ConsumerWidget {
             return const Center(child: Text('無天氣資料'));
           }
 
-          // 尋找指定城市的資料
-          final cityWeather = state.allCities.firstWhere(
-            (station) => station.cityName == cityName,
-            orElse: () => state.allCities.first,
-          );
+          // 從 allCities 中尋找符合 cityName 的站點
+          final cityWeather = state.allCities.cast<WeatherStation?>().firstWhere(
+                (station) => station!.cityName == cityName,
+                orElse: () => null,
+              );
+
+          // 找不到指定城市時顯示明確錯誤，而非 fallback 至其他城市
+          if (cityWeather == null) {
+            return Center(child: Text('找不到「$cityName」的天氣資料'));
+          }
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
