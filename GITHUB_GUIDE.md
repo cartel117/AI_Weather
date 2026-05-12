@@ -103,7 +103,7 @@ cat lib/core/constants/api_constants.dart
 ```dart
 class ApiConstants {
   static const String apiKey = String.fromEnvironment('CWB_API_KEY', 
-    defaultValue: 'YOUR_API_KEY_HERE');
+    defaultValue: 'CWA-A5219274-70A4-4DEB-8698-5F617EF71A12');
   // ... 其他代碼
 }
 ```

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../view/pages/weather_page.dart';
 import '../../view/pages/city_detail_page.dart';
 import '../../view/pages/home_page.dart';
+import '../../view/pages/weather_map_page.dart';
 import 'route_names.dart';
 
 /// 應用程式路由配置
@@ -36,6 +37,14 @@ class AppRouter {
             child: CityDetailPage(cityName: cityName),
           );
         },
+      ),
+      GoRoute(
+        path: RouteNames.weatherMap,
+        name: RouteNames.weatherMap,
+        pageBuilder: (context, state) => MaterialPage(
+          key: state.pageKey,
+          child: const WeatherMapPage(),
+        ),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

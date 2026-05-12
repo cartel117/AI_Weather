@@ -12,15 +12,25 @@ class WeatherStation with _$WeatherStation {
     String? temperature,
     String? humidity,
     String? windSpeed,
+    // 氣象站緯度（GeoInfo.Coordinates）
+    double? latitude,
+    // 氣象站經度（GeoInfo.Coordinates）
+    double? longitude,
   }) = _WeatherStation;
 
   factory WeatherStation.fromJson(Map<String, dynamic> json) {
+    // CWA API 的座標陣列：index 0 = TWD97，index 1 = WGS84
+    final coords = json['GeoInfo']?['Coordinates'] as List?;
+    final wgs84 = coords != null && coords.length > 1 ? coords[1] : null;
+
     return WeatherStation(
       cityName: json['StationName'] ?? '',
       weather: json['WeatherElement']?['Weather'] ?? '--',
       temperature: json['WeatherElement']?['AirTemperature']?.toString(),
       humidity: json['WeatherElement']?['RelativeHumidity']?.toString(),
       windSpeed: json['WeatherElement']?['WindSpeed']?.toString(),
+      latitude: double.tryParse(wgs84?['StationLatitude']?.toString() ?? ''),
+      longitude: double.tryParse(wgs84?['StationLongitude']?.toString() ?? ''),
     );
   }
 }

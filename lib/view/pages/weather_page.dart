@@ -59,6 +59,11 @@ class _WeatherPageState extends ConsumerState<WeatherPage> {
             ),
           ),
           IconButton(
+            icon: const Icon(Icons.map_outlined),
+            tooltip: '天氣地圖',
+            onPressed: () => context.pushNamed(RouteNames.weatherMap),
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
               ref.read(weatherViewModelProvider.notifier).refresh();

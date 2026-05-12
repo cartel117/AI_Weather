@@ -5,4 +5,5 @@ class RouteNames {
   static const String home = '/';
   static const String weather = '/weather';
   static const String cityDetail = '/city-detail';
+  static const String weatherMap = '/weather-map';
 }

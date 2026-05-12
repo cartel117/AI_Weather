@@ -20,7 +20,11 @@ mixin _$WeatherStation {
   String get weather => throw _privateConstructorUsedError;
   String? get temperature => throw _privateConstructorUsedError;
   String? get humidity => throw _privateConstructorUsedError;
-  String? get windSpeed => throw _privateConstructorUsedError;
+  String? get windSpeed =>
+      throw _privateConstructorUsedError; // 氣象站緯度（GeoInfo.Coordinates）
+  double? get latitude =>
+      throw _privateConstructorUsedError; // 氣象站經度（GeoInfo.Coordinates）
+  double? get longitude => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $WeatherStationCopyWith<WeatherStation> get copyWith =>
@@ -38,7 +42,9 @@ abstract class $WeatherStationCopyWith<$Res> {
       String weather,
       String? temperature,
       String? humidity,
-      String? windSpeed});
+      String? windSpeed,
+      double? latitude,
+      double? longitude});
 }
 
 /// @nodoc
@@ -59,6 +65,8 @@ class _$WeatherStationCopyWithImpl<$Res, $Val extends WeatherStation>
     Object? temperature = freezed,
     Object? humidity = freezed,
     Object? windSpeed = freezed,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
   }) {
     return _then(_value.copyWith(
       cityName: null == cityName
@@ -81,6 +89,14 @@ class _$WeatherStationCopyWithImpl<$Res, $Val extends WeatherStation>
           ? _value.windSpeed
           : windSpeed // ignore: cast_nullable_to_non_nullable
               as String?,
+      latitude: freezed == latitude
+          ? _value.latitude
+          : latitude // ignore: cast_nullable_to_non_nullable
+              as double?,
+      longitude: freezed == longitude
+          ? _value.longitude
+          : longitude // ignore: cast_nullable_to_non_nullable
+              as double?,
     ) as $Val);
   }
 }
@@ -98,7 +114,9 @@ abstract class _$$WeatherStationImplCopyWith<$Res>
       String weather,
       String? temperature,
       String? humidity,
-      String? windSpeed});
+      String? windSpeed,
+      double? latitude,
+      double? longitude});
 }
 
 /// @nodoc
@@ -117,6 +135,8 @@ class __$$WeatherStationImplCopyWithImpl<$Res>
     Object? temperature = freezed,
     Object? humidity = freezed,
     Object? windSpeed = freezed,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
   }) {
     return _then(_$WeatherStationImpl(
       cityName: null == cityName
@@ -139,6 +159,14 @@ class __$$WeatherStationImplCopyWithImpl<$Res>
           ? _value.windSpeed
           : windSpeed // ignore: cast_nullable_to_non_nullable
               as String?,
+      latitude: freezed == latitude
+          ? _value.latitude
+          : latitude // ignore: cast_nullable_to_non_nullable
+              as double?,
+      longitude: freezed == longitude
+          ? _value.longitude
+          : longitude // ignore: cast_nullable_to_non_nullable
+              as double?,
     ));
   }
 }
@@ -151,7 +179,9 @@ class _$WeatherStationImpl implements _WeatherStation {
       required this.weather,
       this.temperature,
       this.humidity,
-      this.windSpeed});
+      this.windSpeed,
+      this.latitude,
+      this.longitude});
 
   @override
   final String cityName;
@@ -163,10 +193,16 @@ class _$WeatherStationImpl implements _WeatherStation {
   final String? humidity;
   @override
   final String? windSpeed;
+// 氣象站緯度（GeoInfo.Coordinates）
+  @override
+  final double? latitude;
+// 氣象站經度（GeoInfo.Coordinates）
+  @override
+  final double? longitude;
 
   @override
   String toString() {
-    return 'WeatherStation(cityName: $cityName, weather: $weather, temperature: $temperature, humidity: $humidity, windSpeed: $windSpeed)';
+    return 'WeatherStation(cityName: $cityName, weather: $weather, temperature: $temperature, humidity: $humidity, windSpeed: $windSpeed, latitude: $latitude, longitude: $longitude)';
   }
 
   @override
@@ -182,12 +218,16 @@ class _$WeatherStationImpl implements _WeatherStation {
             (identical(other.humidity, humidity) ||
                 other.humidity == humidity) &&
             (identical(other.windSpeed, windSpeed) ||
-                other.windSpeed == windSpeed));
+                other.windSpeed == windSpeed) &&
+            (identical(other.latitude, latitude) ||
+                other.latitude == latitude) &&
+            (identical(other.longitude, longitude) ||
+                other.longitude == longitude));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, cityName, weather, temperature, humidity, windSpeed);
+  int get hashCode => Object.hash(runtimeType, cityName, weather, temperature,
+      humidity, windSpeed, latitude, longitude);
 
   @JsonKey(ignore: true)
   @override
@@ -203,7 +243,9 @@ abstract class _WeatherStation implements WeatherStation {
       required final String weather,
       final String? temperature,
       final String? humidity,
-      final String? windSpeed}) = _$WeatherStationImpl;
+      final String? windSpeed,
+      final double? latitude,
+      final double? longitude}) = _$WeatherStationImpl;
 
   @override
   String get cityName;
@@ -215,6 +257,10 @@ abstract class _WeatherStation implements WeatherStation {
   String? get humidity;
   @override
   String? get windSpeed;
+  @override // 氣象站緯度（GeoInfo.Coordinates）
+  double? get latitude;
+  @override // 氣象站經度（GeoInfo.Coordinates）
+  double? get longitude;
   @override
   @JsonKey(ignore: true)
   _$$WeatherStationImplCopyWith<_$WeatherStationImpl> get copyWith =>
